@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube 요약 도우미",
+  "version": "1.0.0",
+  "description": "YouTube 동영상을 웹훅으로 요약해주는 Chrome 확장 프로그램",
+  
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "notifications"
+  ],
+  
+  "host_permissions": [
+    "*://*/*"
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "YouTube 요약하기"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/watch*"],
+      "js": ["content.js"]
+    }
+  ],
+  
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  }
+} 
