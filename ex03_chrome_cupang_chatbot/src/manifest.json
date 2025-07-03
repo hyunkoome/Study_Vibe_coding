@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Coupang Review Crawler",
+  "version": "1.0.0",
+  "description": "쿠팡 상품 페이지에서 리뷰를 크롤링하는 확장 프로그램.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.coupang.com/vp/products/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.coupang.com/vp/products/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/xlsx.full.min.js", "chatbot.html", "chatbot.css", "chatbot.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+} 

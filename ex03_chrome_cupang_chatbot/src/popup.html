@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>쿠팡 리뷰 크롤러</title>
+    <style>
+      body { font-family: sans-serif; width: 320px; margin: 0; padding: 16px; background: #fff; }
+      .option-row { display: flex; align-items: center; margin-bottom: 8px; }
+      .option-row label { margin-left: 6px; font-size: 15px; }
+      .input-row { margin-bottom: 12px; }
+      input[type="number"] { width: 60px; padding: 2px 6px; margin-right: 8px; }
+      button { width: 100%; padding: 10px 0; margin-bottom: 8px; font-size: 16px; border: none; border-radius: 4px; background: #3399ff; color: #fff; cursor: pointer; transition: all 0.2s; }
+      button:hover { background: #0074e4; }
+      button:disabled { background: #ccc; cursor: not-allowed; }
+      .csv-btn { background: #4a90e2; }
+      .csv-btn:hover { background: #357ab8; }
+      .csv-btn:disabled { background: #ccc; cursor: not-allowed; }
+      .warn { background: #f8f8f8; color: #d2691e; border: 1px solid #ffe4b5; border-radius: 4px; padding: 8px; font-size: 14px; margin-top: 10px; display: flex; align-items: center; }
+      .warn-icon { margin-right: 6px; font-size: 18px; }
+    </style>
+  </head>
+  <body>
+    <h3>쿠팡 리뷰 크롤러</h3>
+    <div class="option-row">
+      <input type="checkbox" id="include-rating" checked />
+      <label for="include-rating">평점 포함</label>
+    </div>
+    <div class="option-row">
+      <input type="checkbox" id="include-date" checked />
+      <label for="include-date">작성일 포함</label>
+    </div>
+    <div class="input-row">
+      <input type="number" id="max-review-count" min="10" max="1000" value="100" />
+      <span>최대 리뷰 수 (10-1000)</span>
+    </div>
+    <button id="crawl-btn">리뷰 크롤링 시작</button>
+    <button id="csv-btn" class="csv-btn">엑셀(xlsx)로 내보내기</button>
+    <div id="warn-msg" class="warn" style="display:none;">
+      <span class="warn-icon">⚠️</span>
+      <span>쿠팡 상품 페이지에서만 사용 가능합니다.</span>
+    </div>
+    <div id="progress" style="margin-bottom:8px;"></div>
+    <div id="progress-bar" style="height:8px;width:100%;background:#eee;border-radius:4px;overflow:hidden;margin-bottom:12px;display:none;">
+      <div id="progress-bar-inner" style="height:100%;width:0%;background:#3399ff;"></div>
+    </div>
+    <script src="./assets/xlsx.full.min.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html> 
