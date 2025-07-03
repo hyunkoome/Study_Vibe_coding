@@ -20,6 +20,7 @@ class CoupangChatbot {
     init() {
         this.bindEvents();
         this.loadMessages();
+        this.checkCrawlingStatus();
     }
     
     // 이벤트 바인딩
@@ -292,6 +293,52 @@ class CoupangChatbot {
         } catch (e) {
             console.error('메시지 로드 실패:', e);
         }
+    }
+    
+    // 크롤링 상태 확인 함수
+    async checkCrawlingStatus() {
+        try {
+            const storage = await chrome.storage.local.get(['coupang_reviews', 'coupang_progress']);
+            const reviews = storage.coupang_reviews;
+            const progress = storage.coupang_progress;
+            
+            if (!reviews || !progress) {
+                this.showCrawlingStatusMessage('리뷰 데이터가 없습니다. 리뷰 크롤링을 먼저 진행해 주세요.');
+                this.setInputEnabled(false);
+                return false;
+            }
+            
+            if (progress.percent !== 100) {
+                this.showCrawlingStatusMessage('리뷰 크롤링이 진행 중입니다. 잠시 후에 다시 시도해주세요.');
+                this.setInputEnabled(false);
+                return false;
+            }
+            
+            this.showCrawlingStatusMessage('리뷰 크롤링이 완료되었습니다. 챗봇을 이용해주세요.');
+            this.setInputEnabled(true);
+            return true;
+        } catch (e) {
+            console.error('크롤링 상태 확인 실패:', e);
+            this.showCrawlingStatusMessage('크롤링 상태 확인 실패. 다시 시도해주세요.');
+            this.setInputEnabled(false);
+            return false;
+        }
+    }
+    
+    // 입력창 활성화/비활성화 함수
+    setInputEnabled(enabled) {
+        this.input.disabled = !enabled;
+        this.sendBtn.disabled = !enabled;
+    }
+    
+    // 챗봇에 리뷰 크롤링 상태 안내 메시지 출력
+    showCrawlingStatusMessage(message) {
+        const statusElement = document.createElement('div');
+        statusElement.className = 'crawling-status-message';
+        statusElement.textContent = message;
+        
+        this.messagesContainer.appendChild(statusElement);
+        this.scrollToBottom();
     }
 }
 

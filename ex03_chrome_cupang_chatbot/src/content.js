@@ -714,6 +714,7 @@ function injectChatbot() {
 
 // 챗봇 초기화 함수
 function initChatbot() {
+  // 챗봇 열림 여부, 메시지 배열, 타이핑 타임아웃
   let isOpen = false;
   let messages = [];
   let typingTimeout = null;
@@ -725,7 +726,60 @@ function initChatbot() {
   const messagesContainer = document.getElementById('chatbot-messages');
   const input = document.getElementById('chatbot-input');
   const sendBtn = document.getElementById('chatbot-send');
-  
+
+  // 입력창 활성/비활성 함수
+  // enabled: true면 활성화, false면 비활성화
+  function setInputEnabled(enabled) {
+    input.disabled = !enabled;
+    sendBtn.disabled = !enabled;
+  }
+
+  // 크롤링 상태 확인 함수
+  // 크롤링이 완료되었으면 true, 아니면 false를 콜백으로 반환
+  function checkCrawlingStatus(callback) {
+    if (chrome && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(['coupang_reviews', 'coupang_progress'], (result) => {
+        const reviews = result.coupang_reviews;
+        const progress = result.coupang_progress;
+        if (!reviews || !progress || progress.percent !== 100) {
+          callback(false);
+        } else {
+          callback(true);
+        }
+      });
+    } else {
+      callback(false);
+    }
+  }
+
+  // 안내 메시지 추가 함수 (bot 메시지로 출력)
+  function addNoticeMessage(text) {
+    addMessage(text, 'bot');
+  }
+
+  // 챗봇 초기화 시점에 크롤링 상태 확인 및 입력창 제어
+  checkCrawlingStatus((isDone) => {
+    if (!isDone) {
+      setInputEnabled(false);
+      addNoticeMessage('리뷰 크롤링이 완료되어야 챗봇을 사용할 수 있습니다. 먼저 리뷰 크롤링을 진행해 주세요.');
+    } else {
+      setInputEnabled(true);
+    }
+  });
+
+  // 크롤링 완료 이벤트 감지 (storage 변경 감지)
+  if (chrome && chrome.storage && chrome.storage.onChanged) {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.coupang_progress) {
+        const percent = changes.coupang_progress.newValue?.percent;
+        if (percent === 100) {
+          setInputEnabled(true);
+          addNoticeMessage('리뷰 크롤링이 완료되었습니다. 챗봇을 이용해 주세요!');
+        }
+      }
+    });
+  }
+
   // 이벤트 바인딩
   toggle.addEventListener('click', () => {
     if (isOpen) {
