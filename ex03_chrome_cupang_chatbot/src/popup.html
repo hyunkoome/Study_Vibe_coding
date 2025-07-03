@@ -21,6 +21,11 @@
   </head>
   <body>
     <h3>쿠팡 리뷰 크롤러</h3>
+    <div style="margin-bottom:12px;">
+      <label style="display:block; margin-bottom:6px; font-weight:500;">OpenAI API 키</label>
+      <input type="password" id="main-api-key" style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc; margin-bottom:8px;">
+      <button id="main-save-btn" style="background:#007aff; color:#fff; border:none; border-radius:5px; padding:8px 16px;">저장</button>
+    </div>
     <div class="option-row">
       <input type="checkbox" id="include-rating" checked />
       <label for="include-rating">평점 포함</label>
@@ -42,6 +47,10 @@
     <div id="progress" style="margin-bottom:8px;"></div>
     <div id="progress-bar" style="height:8px;width:100%;background:#eee;border-radius:4px;overflow:hidden;margin-bottom:12px;display:none;">
       <div id="progress-bar-inner" style="height:100%;width:0%;background:#3399ff;"></div>
+    </div>
+    <!-- 상세설정 링크 -->
+    <div style="text-align:right; margin-bottom:8px;">
+      <a href="#" id="open-detail-settings" style="font-size:13px; color:#007aff; text-decoration:underline; cursor:pointer;">상세 설정</a>
     </div>
     <script src="./assets/xlsx.full.min.js"></script>
     <script src="popup.js"></script>

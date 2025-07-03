@@ -890,49 +890,33 @@ function initChatbot() {
   // 봇 응답 처리
   async function processBotResponse(userMessage) {
     showTypingIndicator();
-    
-    const response = await generateResponse(userMessage);
-    
+    const response = await generateAIResponse(userMessage);
     hideTypingIndicator();
-    
     addMessage(response, 'bot');
   }
   
-  // 응답 생성
-  async function generateResponse(userMessage) {
-    const message = userMessage.toLowerCase();
-    
-    await delay(1000 + Math.random() * 2000);
-    
-    if (message.includes('상품') || message.includes('제품')) {
-      return '현재 보고 계신 상품에 대해 궁금한 점이 있으시면 구체적으로 말씀해 주세요! 가격, 품질, 배송 등 어떤 것이든 도와드릴 수 있어요. 🛒';
-    }
-    
-    if (message.includes('가격') || message.includes('비용') || message.includes('얼마')) {
-      return '상품 가격은 페이지 상단에서 확인하실 수 있어요. 할인 정보나 쿠폰 적용도 함께 확인해보세요! 💰';
-    }
-    
-    if (message.includes('배송') || message.includes('택배') || message.includes('도착')) {
-      return '배송은 보통 1-3일 내에 완료됩니다. 로켓배송 상품은 당일 또는 다음날 배송이 가능해요! 🚚';
-    }
-    
-    if (message.includes('리뷰') || message.includes('평점') || message.includes('후기')) {
-      return '상품 리뷰는 페이지 하단에서 확인하실 수 있어요. 실제 구매자들의 생생한 후기를 참고해보세요! ⭐';
-    }
-    
-    if (message.includes('환불') || message.includes('교환') || message.includes('반품')) {
-      return '상품 수령 후 7일 이내에 환불/교환이 가능해요. 단, 상품 상태가 양호해야 합니다. 자세한 내용은 고객센터를 이용해주세요! 📞';
-    }
-    
-    if (message.includes('안녕') || message.includes('hello') || message.includes('hi')) {
-      return '안녕하세요! 쿠팡 도우미입니다. 무엇을 도와드릴까요? 😊';
-    }
-    
-    if (message.includes('감사') || message.includes('고마워') || message.includes('thank')) {
-      return '도움이 되어서 기뻐요! 더 궁금한 점이 있으시면 언제든 말씀해 주세요! 😄';
-    }
-    
-    return '죄송해요, 질문을 정확히 이해하지 못했어요. 상품, 가격, 배송, 리뷰 등에 대해 구체적으로 말씀해 주시면 더 정확한 답변을 드릴 수 있어요! 🤔';
+  // AI 답변 생성 함수 (background.js에 질문/리뷰 전달)
+  async function generateAIResponse(userMessage) {
+    // chrome.storage.local에서 리뷰 데이터 불러오기
+    return new Promise((resolve) => {
+      chrome.storage.local.get(['coupang_reviews'], (result) => {
+        const reviews = result.coupang_reviews || [];
+        // background.js에 메시지 전송
+        chrome.runtime.sendMessage({
+          type: 'ASK_GPT',
+          question: userMessage,
+          reviews: reviews
+        }, (response) => {
+          if (response && response.answer) {
+            resolve(response.answer);
+          } else if (response && response.error) {
+            resolve('AI 답변 오류: ' + response.error);
+          } else {
+            resolve('AI 답변을 받아오지 못했습니다.');
+          }
+        });
+      });
+    });
   }
   
   // 타이핑 인디케이터 표시

@@ -161,50 +161,36 @@ class CoupangChatbot {
         this.addMessage(response, 'bot');
     }
     
-    // 응답 생성 (간단한 규칙 기반)
+    // 사용자의 질문과 크롤링된 리뷰를 GPT에 보내고, AI 답변을 받아오는 함수
     async generateResponse(userMessage) {
-        const message = userMessage.toLowerCase();
-        
-        // 인공적인 지연 (타이핑 효과)
-        await this.delay(1000 + Math.random() * 2000);
-        
-        // 상품 관련 질문
-        if (message.includes('상품') || message.includes('제품')) {
-            return '현재 보고 계신 상품에 대해 궁금한 점이 있으시면 구체적으로 말씀해 주세요! 가격, 품질, 배송 등 어떤 것이든 도와드릴 수 있어요. 🛒';
+        // 1. chrome.storage.local에서 최신 리뷰 데이터 가져오기
+        let reviews = [];
+        try {
+            const data = await new Promise((resolve) => {
+                chrome.storage.local.get(['coupang_reviews'], resolve);
+            });
+            reviews = data.coupang_reviews || [];
+        } catch (e) {
+            console.error('리뷰 데이터 불러오기 실패:', e);
         }
-        
-        // 가격 관련 질문
-        if (message.includes('가격') || message.includes('비용') || message.includes('얼마')) {
-            return '상품 가격은 페이지 상단에서 확인하실 수 있어요. 할인 정보나 쿠폰 적용도 함께 확인해보세요! 💰';
-        }
-        
-        // 배송 관련 질문
-        if (message.includes('배송') || message.includes('택배') || message.includes('도착')) {
-            return '배송은 보통 1-3일 내에 완료됩니다. 로켓배송 상품은 당일 또는 다음날 배송이 가능해요! 🚚';
-        }
-        
-        // 리뷰 관련 질문
-        if (message.includes('리뷰') || message.includes('평점') || message.includes('후기')) {
-            return '상품 리뷰는 페이지 하단에서 확인하실 수 있어요. 실제 구매자들의 생생한 후기를 참고해보세요! ⭐';
-        }
-        
-        // 환불/교환 관련 질문
-        if (message.includes('환불') || message.includes('교환') || message.includes('반품')) {
-            return '상품 수령 후 7일 이내에 환불/교환이 가능해요. 단, 상품 상태가 양호해야 합니다. 자세한 내용은 고객센터를 이용해주세요! 📞';
-        }
-        
-        // 안녕/인사
-        if (message.includes('안녕') || message.includes('hello') || message.includes('hi')) {
-            return '안녕하세요! 쿠팡 도우미입니다. 무엇을 도와드릴까요? 😊';
-        }
-        
-        // 감사/고마움
-        if (message.includes('감사') || message.includes('고마워') || message.includes('thank')) {
-            return '도움이 되어서 기뻐요! 더 궁금한 점이 있으시면 언제든 말씀해 주세요! 😄';
-        }
-        
-        // 기본 응답
-        return '죄송해요, 질문을 정확히 이해하지 못했어요. 상품, 가격, 배송, 리뷰 등에 대해 구체적으로 말씀해 주시면 더 정확한 답변을 드릴 수 있어요! 🤔';
+
+        // 2. background.js로 질문+리뷰 전송하여 GPT 답변 요청
+        return new Promise((resolve) => {
+            chrome.runtime.sendMessage(
+                {
+                    type: 'ASK_GPT',
+                    question: userMessage,
+                    reviews: reviews
+                },
+                (response) => {
+                    if (chrome.runtime.lastError || !response || response.error) {
+                        resolve('AI 답변을 받아오지 못했습니다. 잠시 후 다시 시도해 주세요.');
+                    } else {
+                        resolve(response.answer);
+                    }
+                }
+            );
+        });
     }
     
     // 타이핑 인디케이터 표시

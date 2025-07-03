@@ -244,4 +244,28 @@ document.getElementById('csv-btn').addEventListener('click', () => {
       alert('엑셀(xlsx) 내보내기 중 오류가 발생했습니다: ' + e.message);
     }
   });
+});
+
+// OpenAI API 키 입력/저장 기능 (메인에서만)
+document.addEventListener('DOMContentLoaded', function() {
+  const apiKeyInput = document.getElementById('main-api-key');
+  const saveBtn = document.getElementById('main-save-btn');
+
+  // 페이지 로드시 저장된 API 키 불러오기
+  chrome.storage.local.get(['openai_api_key'], function(data) {
+    apiKeyInput.value = data.openai_api_key || '';
+  });
+
+  // 저장 버튼 클릭 시 API 키 저장
+  if (saveBtn) {
+    saveBtn.onclick = function() {
+      const apiKey = apiKeyInput.value.trim();
+      chrome.storage.local.set({ openai_api_key: apiKey }, function() {
+        alert('API 키가 저장되었습니다!');
+      });
+    };
+  }
+
+  // 기존 옵션(평점 포함, 작성일 포함, 최대 리뷰 수 등) 동기화 로직 유지
+  // ... 기존 옵션 동기화 코드 ...
 }); 
